@@ -63,6 +63,7 @@ public class HouseController {
         if (!h.getImagePath().isEmpty()) {
             File file = new File(h.getImagePath());
             file.delete();
+            h.setImagePath("");
             houseService.save(h);
         }
         // Get file extension
