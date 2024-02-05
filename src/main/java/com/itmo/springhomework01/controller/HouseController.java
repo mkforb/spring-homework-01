@@ -76,7 +76,7 @@ public class HouseController {
         // ToDo: Пока не придумал другого решения, как взять из request.getServletContext()
         // Но она при каждом запуске приложения разная
         String dirName = request.getServletContext().getRealPath("/uploads/house");
-        System.out.println(dirName);
+        //System.out.println(dirName);
         // Check directory
         File dir = new File(dirName);
         if (!dir.exists()){
@@ -88,8 +88,7 @@ public class HouseController {
         // Generate file name
         UUID uuid = UUID.randomUUID();
         String fileName = uuid + "." + ext;
-        //String fileName = "/" + uuid + "." + ext;
-        System.out.println(fileName);
+        //System.out.println(fileName);
         // Save file
         File file = new File(dirName+"/"+fileName);
         try {
