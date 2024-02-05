@@ -21,6 +21,8 @@ public class House {
     private String description;
     @Column(nullable = false)
     private boolean archived;
+    @Column(nullable = false)
+    private String imagePath;
     @ManyToOne
     @JoinColumn(nullable = false, name = "landlord_id")
     private Landlord landlord;
@@ -43,6 +45,14 @@ public class House {
 
     public boolean isArchived() {
         return archived;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public Landlord getLandlord() {
