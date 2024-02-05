@@ -3,7 +3,6 @@ package com.itmo.springhomework01.controller;
 import com.itmo.springhomework01.entity.House;
 import com.itmo.springhomework01.exception.ErrorException;
 import com.itmo.springhomework01.service.HouseService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -56,7 +57,7 @@ public class HouseController {
 
     @PostMapping("/{id}/add-image")
     @ResponseBody
-    public ResponseEntity<Void> addImage(HttpServletRequest request, @PathVariable long id, @RequestPart MultipartFile image) {
+    public ResponseEntity<Void> addImage(@PathVariable long id, @RequestPart MultipartFile image) {
         // Get house
         House h = findById(id);
         if (!h.getImagePath().isEmpty()) {
@@ -73,30 +74,19 @@ public class HouseController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File name is incorrect.");
         }
         // Get directory
-        // ToDo: Пока не придумал другого решения, как взять из request.getServletContext()
-        // Но она при каждом запуске приложения разная
-        String dirName = request.getServletContext().getRealPath("/uploads/house");
-        //System.out.println(dirName);
-        // Check directory
-        File dir = new File(dirName);
-        if (!dir.exists()){
-            boolean dirCreated = dir.mkdirs();
-            if (!dirCreated) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Directory cannot be created.");
-            }
-        }
+        String dirName = "src/main/resources/uploads/house";
         // Generate file name
         UUID uuid = UUID.randomUUID();
         String fileName = uuid + "." + ext;
         //System.out.println(fileName);
         // Save file
         File file = new File(dirName+"/"+fileName);
-        try {
-            image.transferTo(file);
+        try (OutputStream os = new FileOutputStream(file)) {
+            os.write(image.getBytes());
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-        h.setImagePath(dirName+"/"+fileName);
+        h.setImagePath(file.getAbsolutePath());
         houseService.save(h);
         return ResponseEntity.accepted().build();
     }
