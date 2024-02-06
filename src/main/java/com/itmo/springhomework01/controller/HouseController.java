@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,6 +48,17 @@ public class HouseController {
         }
     }
 
+    @GetMapping("/page/{id}")
+    public String pageFindById(@PathVariable long id, Model model) {
+        try {
+            House h = houseService.findById(id);
+            model.addAttribute("house", h);
+            return "house";
+        } catch (ErrorException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
     @PostMapping("/add")
     @ResponseBody
     public ResponseEntity<Void> add(@RequestBody @Valid House house) {
@@ -58,10 +70,15 @@ public class HouseController {
     @PostMapping("/{id}/add-image")
     @ResponseBody
     public ResponseEntity<Void> addImage(@PathVariable long id, @RequestPart MultipartFile image) {
+        // Как я понял, по умоланию картинки берутся из папки src/main/resources/static, которая находится внутри приложения.
+        // При запуске через jar-файл загруженные картинки будут недоступны.
+        // Подсмотрел в Интернет, что можно перенаправить на папку вне приложения через WebMvcConfigurer
+        // Get directory
+        String dirName = "upload/house";
         // Get house
         House h = findById(id);
         if (!h.getImagePath().isEmpty()) {
-            File file = new File(h.getImagePath());
+            File file = new File(dirName+"/"+h.getImagePath());
             file.delete();
             h.setImagePath("");
             houseService.save(h);
@@ -74,8 +91,6 @@ public class HouseController {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File name is incorrect.");
         }
-        // Get directory
-        String dirName = "src/main/resources/uploads/house";
         // Generate file name
         UUID uuid = UUID.randomUUID();
         String fileName = uuid + "." + ext;
@@ -87,7 +102,7 @@ public class HouseController {
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-        h.setImagePath(file.getAbsolutePath());
+        h.setImagePath(fileName);
         houseService.save(h);
         return ResponseEntity.accepted().build();
     }
