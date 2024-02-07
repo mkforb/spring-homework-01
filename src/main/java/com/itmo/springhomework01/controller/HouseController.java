@@ -73,6 +73,7 @@ public class HouseController {
         // Как я понял, по умоланию картинки берутся из папки src/main/resources/static, которая находится внутри приложения.
         // При запуске через jar-файл загруженные картинки будут недоступны.
         // Подсмотрел в Интернет, что можно перенаправить на папку вне приложения через WebMvcConfigurer
+        // ToDo: Перенести сохранение файла в сервис
         // Get directory
         String dirName = "upload/house";
         // Get house
