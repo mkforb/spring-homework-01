@@ -6,7 +6,12 @@
 </head>
 <body>
 <div>
-    <img th:src="@{/upload/house/{path}(path=${house.imagePath})}">
+    <div th:if="${house.imagePath != null and !house.imagePath.isEmpty()}">
+        <img th:src="@{/upload/house/{path}(path=${house.imagePath})}">
+    </div>
+    <div th:if="${house.imagePath == null or house.imagePath.isEmpty()}">
+        No image yet.
+    </div>
 </div>
 </body>
 </html>
